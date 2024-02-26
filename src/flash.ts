@@ -8,6 +8,100 @@ import {
 } from "./const";
 import { sleep } from "./util/sleep";
 
+import { Buffer }  from 'buffer';
+
+async function findAndReplaceInFirmware(firmwareBuffer:string, findString:string, replaceString:string) {
+  replaceString = replaceString.padEnd(findString.length, '\u0000');
+  let stringBuffer = firmwareBuffer.replace(findString, replaceString);
+  console.log("before Buffer.from");
+  let replacedBuffer = Buffer.from(stringBuffer, 'binary');
+  console.log("after Buffer.from");
+  replacedBuffer = await fixFirmwareChecksums(replacedBuffer);
+  return replacedBuffer.toString('binary');
+};
+
+// fixFirmwareChecksums: given a firmware, fix the checksums
+async function fixFirmwareChecksums(toReplace:Buffer) {
+	console.log("fixFirmwareChecksums");
+        let bufferSize = toReplace.length
+        console.log("Read " + bufferSize + " bytes from file\n");
+
+        let newFirmware = Buffer.alloc(bufferSize);
+        let newFirmwarePosition = 0;
+
+        // PARSE HEADER
+        // first 8+16 bytes are the header
+        let nrOfSegments = toReplace.readInt8(1);
+        console.log("Number of Segments: " + nrOfSegments);
+	// disable sha256:
+	toReplace[8+15] = 0;
+        let shaChecksum = toReplace.readInt8(8+15);
+        console.log("Firmware has SHA checksum: " + shaChecksum);
+        // Copy header to new firmware:
+        toReplace.slice(0,8+16).copy(newFirmware);
+        newFirmwarePosition += 8+16;
+
+        // READ SEGMENTS
+        let xorChecksum = 0xEF;
+        let segmentstart = 8+16;
+        for (let segment=0 ; segment<nrOfSegments ; segment++) {
+                console.log("\nParsing segment " + segment);
+
+                let memOffset = toReplace.readInt32LE(segmentstart);
+                console.log("Memory Offset = " + memOffset);
+
+                let size = toReplace.readInt32LE(segmentstart+4);
+                console.log("Size = " + size);
+                let segmentEnd = segmentstart+8+size;
+                //console.log("End of segment: " + segmentEnd)
+
+                // Copy segment to new firmware:
+                toReplace.slice(segmentstart,segmentEnd).copy(newFirmware,newFirmwarePosition);
+                newFirmwarePosition = segmentEnd;
+                // Exclude header from segment
+                xorChecksum = updateChecksum(toReplace.slice(segmentstart+8,segmentEnd), xorChecksum);
+
+                // Move forward in buffer
+                segmentstart = segmentEnd
+        }
+
+        // BUILD FOOTER
+        //console.log("Reading footer:"); console.log(toReplace.slice(segmentstart))
+
+        // Calculate length with padding to multiple of 16
+        let targetLength = (Math.floor(newFirmwarePosition/16) + 1)*16;
+
+        // Pad new firmware to targetLength (- 1 for checksum)
+        Buffer.alloc(targetLength-1-newFirmwarePosition, 0x00).copy(newFirmware,newFirmwarePosition);
+        newFirmwarePosition = targetLength-1; // Leave 1 byte for the checksum
+
+        // Add XOR checksum
+        console.log("\nAdding XOR checksum: " + xorChecksum.toString(16) + "\n");
+        newFirmware[targetLength-1] = xorChecksum;
+        newFirmwarePosition = targetLength;
+
+        // Add SHA256 checksum
+        if (shaChecksum == 1) {
+		console.log("WARNING: Adding SHA256 checksum is not needed and not supported!");
+        } else {
+		console.log("Not adding sha256 checksum because there was none in the original file!");
+	}
+
+        return newFirmware;
+}
+
+
+
+function updateChecksum(buffer:Buffer, startValue:number) {
+        let xorChecksum = startValue;
+        for (let start=0;start<buffer.length;start++) {
+                xorChecksum = xorChecksum ^ buffer.readInt8(start);
+        }
+        return xorChecksum;
+}
+
+
+
 const resetTransport = async (transport: Transport) => {
   await transport.device.setSignals({
     dataTerminalReady: false,
@@ -130,7 +224,45 @@ export const flash = async (
 
   for (let part = 0; part < filePromises.length; part++) {
     try {
-      const data = await filePromises[part];
+      let data = await filePromises[part];
+      if (part == 3) {
+	console.log("Customizing part 3 of length " + data.length + " bytes.");
+
+	const wifissid = (document.getElementById('wifissid') as HTMLInputElement)?.value;
+        const wifikey = (document.getElementById('wifikey') as HTMLInputElement)?.value;
+        const lnbitshost = (document.getElementById('lnbitshost') as HTMLInputElement)?.value;
+        const lnbitskey = (document.getElementById('lnbitskey') as HTMLInputElement)?.value;
+
+        if (!wifissid || !wifikey || !lnbitshost || !lnbitskey) throw new Error('ERROR: empty wifissid, wifikey, lnbitshost or lnbitskey are not supported for the configuration!');
+
+        const fiatcurrency = (document.getElementById('fiatcurrency') as HTMLInputElement)?.value;
+        const timezone = (document.getElementById('timezone') as HTMLInputElement)?.value;
+        const locale = (document.getElementById('locale') as HTMLInputElement)?.value;
+        const thousands = (document.getElementById('thousands') as HTMLInputElement)?.value;
+        const decimals = (document.getElementById('decimals') as HTMLInputElement)?.value;
+        const bootsloganprelude = (document.getElementById('bootsloganprelude') as HTMLInputElement)?.value;
+        const showbootslogan = (document.getElementById('showbootslogan') as HTMLInputElement)?.value;
+
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID", wifissid);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY", wifikey);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYLNBITSHOST_REPLACETHISBYLNBITSHOST_REPLACETHISBYLNBITSHOST", lnbitshost);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYLNBITSKEY_REPLACETHISBYLNBITSKEY_REPLACETHISBYLNBITSKEY", lnbitskey);
+
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY", fiatcurrency);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYTIMEZONE_REPLACETHISBYTIMEZONE_REPLACETHISBYTIMEZONE", timezone);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYLOCALE_REPLACETHISBYLOCALE_REPLACETHISBYLOCALE", locale);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYTHOUSANDSSEPARATOR_REPLACETHISBYTHOUSANDSSEPARATOR_REPLACETHISBYTHOUSANDSSEPARATOR", thousands);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYDECIMALSEPARATOR_REPLACETHISBYDECIMALSEPARATOR_REPLACETHISBYDECIMALSEPARATOR", decimals);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE", bootsloganprelude);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN", showbootslogan);
+
+	console.log("Firmware length after customization (should match before): " + data.length + " bytes.");
+	// Dump it to the console for inspection:
+	var encodedStringBtoA = btoa(data);
+	console.log(encodedStringBtoA);
+      } else {
+	console.log("Not customizing firmware part " + part);
+      }
       fileArray.push({ data, address: build.parts[part].offset });
       totalSize += data.length;
     } catch (err: any) {

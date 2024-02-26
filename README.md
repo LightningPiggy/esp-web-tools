@@ -1,5 +1,9 @@
 # ESP Web Tools
 
+Update src/flash.ts and then run:
+
+./script/develop
+
 Allow flashing ESPHome or other ESP-based firmwares via the browser. Will automatically detect the board type and select a supported firmware. [See website for full documentation.](https://esphome.github.io/esp-web-tools/)
 
 ```html
