@@ -239,6 +239,21 @@
 	  }
 	  });
       });
+      const button = document.querySelector('esp-web-install-button');
+      button.addEventListener("click", (event) => {
+	let allgood = true;
+        Array.from(document.getElementsByClassName("required")).forEach(button => {
+          let element = button.value;
+          allgood = allgood && (element != "");
+	});
+        if (allgood) {
+          //alert("allgood");
+          return true;
+        } else {
+	  alert("Please make sure you've filled in all required fields, otherwise the device won't work properly.");
+	  return false;
+        }
+      });
     </script>
   </body>
 </html>
