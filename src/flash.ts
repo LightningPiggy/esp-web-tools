@@ -11,13 +11,18 @@ import { sleep } from "./util/sleep";
 import { Buffer }  from 'buffer';
 
 async function findAndReplaceInFirmware(firmwareBuffer:string, findString:string, replaceString:string) {
+  console.log("firmwareBuffer.length is " + firmwareBuffer.length + ", findString.length is " + findString.length + " and replaceString.length is " + replaceString.length);
   replaceString = replaceString.padEnd(findString.length, '\u0000');
+  console.log("after padding, replaceString.length is " + replaceString.length);
   let stringBuffer = firmwareBuffer.replace(findString, replaceString);
-  console.log("before Buffer.from");
+  console.log("after replacing, stringBuffer.length is " + stringBuffer.length);
   let replacedBuffer = Buffer.from(stringBuffer, 'binary');
-  console.log("after Buffer.from");
+  console.log("after Buffer.from, replacedBuffer.length is " + replacedBuffer.length);
   replacedBuffer = await fixFirmwareChecksums(replacedBuffer);
-  return replacedBuffer.toString('binary');
+  console.log("after fixFirmwareChecksums, replacedBuffer.length is " + replacedBuffer.length);
+  let string_to_return = replacedBuffer.toString('binary');
+  console.log("after toString(), string_to_return.length is " + string_to_return.length);
+  return string_to_return;
 };
 
 // fixFirmwareChecksums: given a firmware, fix the checksums
@@ -84,7 +89,7 @@ async function fixFirmwareChecksums(toReplace:Buffer) {
         if (shaChecksum == 1) {
 		console.log("WARNING: Adding SHA256 checksum is not needed and not supported!");
         } else {
-		console.log("Not adding sha256 checksum because there was none in the original file!");
+		console.log("Not adding sha256 checksum because there was none in the original file. This is normal.");
 	}
 
         return newFirmware;
@@ -242,6 +247,8 @@ export const flash = async (
         const decimals = (document.getElementById('decimals') as HTMLInputElement)?.value;
         const bootsloganprelude = (document.getElementById('bootsloganprelude') as HTMLInputElement)?.value;
         const showbootslogan = (document.getElementById('showbootslogan') as HTMLInputElement)?.value;
+        const staticlnurlp = (document.getElementById('staticlnurlp') as HTMLInputElement)?.value;
+        const balancebias = (document.getElementById('balancebias') as HTMLInputElement)?.value;
 
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID", wifissid);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY", wifikey);
@@ -255,6 +262,8 @@ export const flash = async (
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYDECIMALSEPARATOR_REPLACETHISBYDECIMALSEPARATOR_REPLACETHISBYDECIMALSEPARATOR", decimals);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE", bootsloganprelude);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN", showbootslogan);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING", staticlnurlp);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS", balancebias);
 
 	console.log("Firmware length after customization (should match before): " + data.length + " bytes.");
 	// Dump it to the console for inspection:
@@ -266,6 +275,8 @@ export const flash = async (
       fileArray.push({ data, address: build.parts[part].offset });
       totalSize += data.length;
     } catch (err: any) {
+      console.error("Firmware customization got error:");
+      console.error(err);
       fireStateEvent({
         state: FlashStateType.ERROR,
         message: err.message,
@@ -347,6 +358,8 @@ export const flash = async (
       }
     );
   } catch (err: any) {
+    console.error("Firmware write failed:");
+    console.error(err);
     fireStateEvent({
       state: FlashStateType.ERROR,
       message: err.message,
