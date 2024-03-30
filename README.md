@@ -1,5 +1,13 @@
 # ESP Web Tools
 
+This fork of ESP Web Tools for LightningPiggy supports find-and-replace of configuration values in the binary firmware.
+
+So the binary firmware files (such as Main.ino.bin) contain hard-coded configuration strings such as "REPLACETHISBYWALLETID_REPLACETHISBYWALLETID_REPLACETHISBYWALLETID", which are then replaced by the values the user provides on the webpage.
+
+So the Javascript code (see dist/flash.js) will modify the binary firmware files on the fly, fix the XOR checksum, and then upload the firmware to the ESP32 device.
+
+## Development
+
 Update src/flash.ts and then run:
 
 ./script/develop
