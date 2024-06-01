@@ -250,6 +250,7 @@ export const flash = async (
         const staticlnurlp = (document.getElementById('staticlnurlp') as HTMLInputElement)?.value;
         const walletid = (document.getElementById('walletid') as HTMLInputElement)?.value;
         const balancebias = (document.getElementById('balancebias') as HTMLInputElement)?.value;
+        const lnbitsport = (document.getElementById('lnbitsport') as HTMLInputElement)?.value;
 
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID", wifissid);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY", wifikey);
@@ -266,6 +267,7 @@ export const flash = async (
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING", staticlnurlp);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWALLETID_REPLACETHISBYWALLETID_REPLACETHISBYWALLETID", walletid);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS", balancebias);
+	data = await findAndReplaceInFirmware(data, "REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT", lnbitsport);
 
 	console.log("Firmware length after customization (should match before): " + data.length + " bytes.");
 	// Dump it to the console for inspection:
