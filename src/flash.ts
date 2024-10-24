@@ -248,7 +248,6 @@ export const flash = async (
         const bootsloganprelude = (document.getElementById('bootsloganprelude') as HTMLInputElement)?.value;
         const showbootslogan = (document.getElementById('showbootslogan') as HTMLInputElement)?.value;
         const staticlnurlp = (document.getElementById('staticlnurlp') as HTMLInputElement)?.value;
-        const walletid = (document.getElementById('walletid') as HTMLInputElement)?.value;
         const balancebias = (document.getElementById('balancebias') as HTMLInputElement)?.value;
         const lnbitsport = (document.getElementById('lnbitsport') as HTMLInputElement)?.value;
 
@@ -265,7 +264,6 @@ export const flash = async (
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE_REPLACETHISBYBOOTSLOGANPRELUDE", bootsloganprelude);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN_REPLACETHISBYSHOWBOOTSLOGAN", showbootslogan);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING", staticlnurlp);
-	data = await findAndReplaceInFirmware(data, "REPLACETHISBYWALLETID_REPLACETHISBYWALLETID_REPLACETHISBYWALLETID", walletid);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS_REPLACETHISBYBALANCEBIAS", balancebias);
 	data = await findAndReplaceInFirmware(data, "REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT", lnbitsport);
 
