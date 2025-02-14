@@ -200,6 +200,7 @@ export class EwtInstallDialog extends LitElement {
                       this._state = "ASK_ERASE";
                     } else {
                       this._startInstall(true);
+                      //this._startInstall(false); // This makes the difference! But "ask" is even better.
                     }
                   }}
                 ></ewt-button>
@@ -309,8 +310,9 @@ export class EwtInstallDialog extends LitElement {
                 this._state = "ASK_ERASE";
               } else {
                 // Default is to erase a device that does not support Improv Serial
-                //this._startInstall(true);
-                this._startInstall(false); // don't erase existing config
+		// But this one isn't used here, it seems...
+                this._startInstall(true);
+                //this._startInstall(false); // don't erase existing config
               }
             }}
           ></ewt-button>
