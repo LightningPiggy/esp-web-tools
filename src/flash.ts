@@ -238,7 +238,7 @@ export const flash = async (
         const lnbitshost = (document.getElementById('lnbitshost') as HTMLInputElement)?.value;
         const lnbitskey = (document.getElementById('lnbitskey') as HTMLInputElement)?.value;
 
-        if (!wifissid || !wifikey || !lnbitshost || !lnbitskey) throw new Error('ERROR: empty wifissid, wifikey, lnbitshost or lnbitskey are not supported for the configuration!');
+        //if (!wifissid || !wifikey || !lnbitshost || !lnbitskey) throw new Error('ERROR: empty wifissid, wifikey, lnbitshost or lnbitskey are not supported for the configuration!');
 
         const fiatcurrency = (document.getElementById('fiatcurrency') as HTMLInputElement)?.value;
         const timezone = (document.getElementById('timezone') as HTMLInputElement)?.value;
