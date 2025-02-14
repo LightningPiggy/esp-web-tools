@@ -1,4 +1,5 @@
-target=/home/user/wip-LightningPiggy/sources/lightningpiggy.github.io/
+#target=/home/user/wip-LightningPiggy/sources/lightningpiggy.github.io/
+target=/home/user/projects/wip-LightningPiggy/sources/lightningpiggy.github.io/
 
 mkdir -p "$target"/dist/webumd/
 cp dist/webumd/install-button.js "$target"/dist/webumd/
