@@ -8,6 +8,7 @@ import {
 } from "./const";
 import { sleep } from "./util/sleep";
 
+/*
 import { Buffer }  from 'buffer';
 
 async function findAndReplaceInFirmware(firmwareBuffer:string, findString:string, replaceString:string) {
@@ -95,8 +96,6 @@ async function fixFirmwareChecksums(toReplace:Buffer) {
         return newFirmware;
 }
 
-
-
 function updateChecksum(buffer:Buffer, startValue:number) {
         let xorChecksum = startValue;
         for (let start=0;start<buffer.length;start++) {
@@ -105,7 +104,7 @@ function updateChecksum(buffer:Buffer, startValue:number) {
         return xorChecksum;
 }
 
-
+*/
 
 const resetTransport = async (transport: Transport) => {
   await transport.device.setSignals({
@@ -230,9 +229,9 @@ export const flash = async (
   for (let part = 0; part < filePromises.length; part++) {
     try {
       let data = await filePromises[part];
+/*
       if (part == 3) {
 	console.log("Customizing part 3 of length " + data.length + " bytes.");
-
 	const wifissid = (document.getElementById('wifissid') as HTMLInputElement)?.value;
         const wifikey = (document.getElementById('wifikey') as HTMLInputElement)?.value;
         const lnbitshost = (document.getElementById('lnbitshost') as HTMLInputElement)?.value;
@@ -274,6 +273,7 @@ export const flash = async (
       } else {
 	console.log("Not customizing firmware part " + part);
       }
+*/
       fileArray.push({ data, address: build.parts[part].offset });
       totalSize += data.length;
     } catch (err: any) {
